@@ -8,6 +8,7 @@ from email.mime.text import MIMEText
 import smtplib # to send the email
 import requests
 from dotenv import load_dotenv
+import feedparser 
 
 load_dotenv()
 
@@ -46,12 +47,28 @@ def get_weather():
 
 def get_news():
     """Returns top headlines."""
-    headlines = [
-        "Tech Giants Unveil New Open-Source AI Models at Annual Summit",
-        "Global Markets Rally Amid Favorable Economic Indicators",
-        "Local Sports Team Secures Championship Victory in Dramatic Finish"
-    ]
-    return "\n".join(f"{idx}. {story}" for idx, story in enumerate(headlines, 1))
+    # headlines = [
+    #     "Tech Giants Unveil New Open-Source AI Models at Annual Summit",
+    #     "Global Markets Rally Amid Favorable Economic Indicators",
+    #     "Local Sports Team Secures Championship Victory in Dramatic Finish"
+    # ]
+    # return "\n".join(f"{idx}. {story}" for idx, story in enumerate(headlines, 1))
+
+    rss_url = "https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en"
+
+    try:
+        feed = feedparser.parse(rss_url)
+
+        headlines = []
+        for entry in feed.entries[:5]:
+            headlines.append(entry.title)
+
+        if not headlines:
+            return "No news headlines found!"
+        return "\n".join(f"{idx}. {story}" for idx, story in enumerate(headlines, 1))
+    except Exception as e:
+        return f"Could not fetch live news: {e}"
+
 
 def send_email(content):
     """Sends the formatted digest email via SMTP."""
